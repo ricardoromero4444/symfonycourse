@@ -2,10 +2,10 @@
 
 namespace App\Controller;
 
-use App\Form;
 use App\Entity\Post;
-use App\Repository\PostRepository;
+use App\Form;
 use App\Form\PostType;
+use App\Repository\PostRepository;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -71,12 +71,13 @@ class PostController extends AbstractController
     /**
      * @Route("/show/{id}", name="show")
      */
-    public function show(Post $post)
+    public function show($id, PostRepository $postRepository)
     {
+        $post = $postRepository->findPostWithCategory($id);
     
-    return $this->render('post/show.html.twig', [
-        'post' => $post,
-    ]);
+        return $this->render('post/show.html.twig', [
+            'post' => $post[0],
+        ]);
 
     }
 
