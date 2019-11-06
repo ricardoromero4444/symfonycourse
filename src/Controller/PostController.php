@@ -33,19 +33,25 @@ class PostController extends AbstractController
     /**
      * @Route("/create", name="create")
      */
-    public function create()
+    public function create(Request $request)
     {
     	$post = new Post();
 
         $form = $this->createForm(PostType::class, $post);
-    	
-    	// Entity manager
-    	$em = $this->getDoctrine()->getManager();
 
-    	// Simply creates a query
-    	// $em->persist($post);
-    	// Actually performs the query
-    	// $em->flush();
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()) {
+            // Entity manager
+            $em = $this->getDoctrine()->getManager();
+
+        	// Simply creates a query
+        	$em->persist($post);
+            // Actually performs the query
+            $em->flush();
+
+            return $this->redirect($this->generateUrl('post.index'));
+        }
 
         return $this->render('post/create.html.twig', [
             'form' => $form->createView()
