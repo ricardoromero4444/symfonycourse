@@ -45,10 +45,20 @@ class PostController extends AbstractController
             // Entity manager
             $em = $this->getDoctrine()->getManager();
 
-        	// Simply creates a query
-        	$em->persist($post);
-            // Actually performs the query
-            $em->flush();
+            $file = $request->files->get('post')['attachment'];
+
+            if ($file) {
+                $filename = md5(uniqid()) . '.' . $file->guessClientExtension();
+
+                $file->move(
+                    $this->getParameter('uploads_dir'),
+                    $filename
+                );
+                $post->setImage($filename);
+            }
+
+        	$em->persist($post);  // Simply creates a query
+            $em->flush();  // Actually performs the query
 
             return $this->redirect($this->generateUrl('post.index'));
         }
