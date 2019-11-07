@@ -6,6 +6,7 @@ use App\Entity\Post;
 use App\Form;
 use App\Form\PostType;
 use App\Repository\PostRepository;
+use App\Services\FileUploader;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -33,7 +34,7 @@ class PostController extends AbstractController
     /**
      * @Route("/create", name="create")
      */
-    public function create(Request $request)
+    public function create(Request $request, FileUploader $fileUploader)
     {
     	$post = new Post();
 
@@ -42,23 +43,21 @@ class PostController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
-            // Entity manager
             $em = $this->getDoctrine()->getManager();
 
             $file = $request->files->get('post')['attachment'];
 
+            dump($file);
+
             if ($file) {
-                $filename = md5(uniqid()) . '.' . $file->guessClientExtension();
 
-                $file->move(
-                    $this->getParameter('uploads_dir'),
-                    $filename
-                );
+                $filename = $fileUploader->uploadFile($file);
+
                 $post->setImage($filename);
-            }
 
-        	$em->persist($post);  // Simply creates a query
-            $em->flush();  // Actually performs the query
+                $em->persist($post);  // Simply creates a query
+                $em->flush();  // Actually performs the query
+            }
 
             return $this->redirect($this->generateUrl('post.index'));
         }
@@ -71,12 +70,10 @@ class PostController extends AbstractController
     /**
      * @Route("/show/{id}", name="show")
      */
-    public function show($id, PostRepository $postRepository)
+    public function show(Post $post)
     {
-        $post = $postRepository->findPostWithCategory($id);
-    
         return $this->render('post/show.html.twig', [
-            'post' => $post[0],
+            'post' => $post,
         ]);
 
     }

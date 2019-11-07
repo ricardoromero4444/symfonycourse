@@ -22,11 +22,13 @@ class PostRepository extends ServiceEntityRepository
     public function findPostWithCategory(int $id)
     {
         $qb = $this->createQueryBuilder('p');
-        $qb->select('p.title')
-            ->addSelect('p.image')
-            ->addSelect('c.name AS category')
-            ->addSelect('c.id AS category_id')
+        $qb
             ->innerJoin('p.category', 'c')
+            ->select('p.title')
+            ->addSelect('p.image')
+            ->addSelect('p.id AS post_id')
+            ->addSelect('c.name AS category')
+            ->addSelect('c.id AS cat_id')
             ->where('p.id = :id')
             ->setParameter('id', $id)
         ;
